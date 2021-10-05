@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 
 
 ```{r}
-weather_df = 
+weather_df <- 
   rnoaa::meteo_pull_monitors(
     c("USW00094728", "USC00519397", "USS0023B17S"),
     var = c("PRCP", "TMIN", "TMAX"), 
