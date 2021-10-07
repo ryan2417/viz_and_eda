@@ -17,6 +17,12 @@ library(tidyverse)
     ## x dplyr::lag()    masks stats::lag()
 
 ``` r
+library(viridis)
+```
+
+    ## Loading required package: viridisLite
+
+``` r
 library(ggridges)
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -64,3 +70,121 @@ weather_df <-
     ## date created (size, mb): 2021-10-05 10:37:10 (0.912)
 
     ## file min/max dates: 1999-09-01 / 2021-09-30
+
+## Start with a familiar one
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature at three stations",
+    x = "Minimum daily temp(C)",
+    y = "Maximum daily temp(C)",
+    caption = "Data from rnoaa package with three stations"
+  )
+```
+
+    ## Warning: Removed 15 rows containing missing values (geom_point).
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-3-1.png" width="90%" />
+
+## Scales
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature at three stations",
+    x = "Minimum daily temp(C)",
+    y = "Maximum daily temp(C)",
+    caption = "Data from rnoaa package with three stations"
+  ) +
+  scale_x_continuous(
+    breaks = c(-15, 0, 15),
+    labels = c("-15C", "0C", "15C")
+  ) +
+  scale_y_continuous(
+    trans = "sqrt",
+    position = "right"
+  )
+```
+
+    ## Warning in self$trans$transform(x): NaNs produced
+
+    ## Warning: Transformation introduced infinite values in continuous y-axis
+
+    ## Warning: Removed 90 rows containing missing values (geom_point).
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature at three stations",
+    x = "Minimum daily temp(C)",
+    y = "Maximum daily temp(C)",
+    caption = "Data from rnoaa package with three stations"
+  ) +
+  scale_color_hue(
+    name = "Location"
+  )
+```
+
+    ## Warning: Removed 15 rows containing missing values (geom_point).
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
+
+``` r
+  scale_color_viridis_d()
+```
+
+    ## <ggproto object: Class ScaleDiscrete, Scale, gg>
+    ##     aesthetics: colour
+    ##     axis_order: function
+    ##     break_info: function
+    ##     break_positions: function
+    ##     breaks: waiver
+    ##     call: call
+    ##     clone: function
+    ##     dimension: function
+    ##     drop: TRUE
+    ##     expand: waiver
+    ##     get_breaks: function
+    ##     get_breaks_minor: function
+    ##     get_labels: function
+    ##     get_limits: function
+    ##     guide: legend
+    ##     is_discrete: function
+    ##     is_empty: function
+    ##     labels: waiver
+    ##     limits: NULL
+    ##     make_sec_title: function
+    ##     make_title: function
+    ##     map: function
+    ##     map_df: function
+    ##     n.breaks.cache: NULL
+    ##     na.translate: TRUE
+    ##     na.value: NA
+    ##     name: waiver
+    ##     palette: function
+    ##     palette.cache: NULL
+    ##     position: left
+    ##     range: <ggproto object: Class RangeDiscrete, Range, gg>
+    ##         range: NULL
+    ##         reset: function
+    ##         train: function
+    ##         super:  <ggproto object: Class RangeDiscrete, Range, gg>
+    ##     rescale: function
+    ##     reset: function
+    ##     scale_name: viridis_d
+    ##     train: function
+    ##     train_df: function
+    ##     transform: function
+    ##     transform_df: function
+    ##     super:  <ggproto object: Class ScaleDiscrete, Scale, gg>
+
+color scale `viridis`

@@ -5,6 +5,7 @@ output: github_document
 
 ```{r}
 library(tidyverse)
+library(viridis)
 library(ggridges)
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -32,3 +33,57 @@ weather_df <-
   select(name, id, everything())
 ```
 
+## Start with a familiar one
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature at three stations",
+    x = "Minimum daily temp(C)",
+    y = "Maximum daily temp(C)",
+    caption = "Data from rnoaa package with three stations"
+  )
+```
+
+## Scales
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature at three stations",
+    x = "Minimum daily temp(C)",
+    y = "Maximum daily temp(C)",
+    caption = "Data from rnoaa package with three stations"
+  ) +
+  scale_x_continuous(
+    breaks = c(-15, 0, 15),
+    labels = c("-15C", "0C", "15C")
+  ) +
+  scale_y_continuous(
+    trans = "sqrt",
+    position = "right"
+  )
+```
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature at three stations",
+    x = "Minimum daily temp(C)",
+    y = "Maximum daily temp(C)",
+    caption = "Data from rnoaa package with three stations"
+  ) +
+  scale_color_hue(
+    name = "Location"
+  )
+  scale_color_viridis_d()
+```
+
+
+color scale `viridis`
