@@ -3,27 +3,10 @@ ggplot\_2
 
 ``` r
 library(tidyverse)
-```
-
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
-
-    ## ✓ ggplot2 3.3.5     ✓ purrr   0.3.4
-    ## ✓ tibble  3.1.4     ✓ dplyr   1.0.7
-    ## ✓ tidyr   1.1.3     ✓ stringr 1.4.0
-    ## ✓ readr   2.0.1     ✓ forcats 0.5.1
-
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
-
-``` r
-library(viridis)
-```
-
-    ## Loading required package: viridisLite
-
-``` r
+library(viridisLite)
 library(ggridges)
+library(patchwork)
+
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
@@ -31,6 +14,15 @@ knitr::opts_chunk$set(
   fig.height = 6,
   out.width = "90%"
 )
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ``` r
@@ -101,62 +93,13 @@ weather_df %>%
     y = "Maximum daily temp(C)",
     caption = "Data from rnoaa package with three stations"
   ) +
-  scale_color_hue(
+   scale_color_hue(
     name = "Location"
-  )
-```
-
-<img src="viz_part2_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
-
-``` r
+  ) +
   scale_color_viridis_d()
 ```
 
-    ## <ggproto object: Class ScaleDiscrete, Scale, gg>
-    ##     aesthetics: colour
-    ##     axis_order: function
-    ##     break_info: function
-    ##     break_positions: function
-    ##     breaks: waiver
-    ##     call: call
-    ##     clone: function
-    ##     dimension: function
-    ##     drop: TRUE
-    ##     expand: waiver
-    ##     get_breaks: function
-    ##     get_breaks_minor: function
-    ##     get_labels: function
-    ##     get_limits: function
-    ##     guide: legend
-    ##     is_discrete: function
-    ##     is_empty: function
-    ##     labels: waiver
-    ##     limits: NULL
-    ##     make_sec_title: function
-    ##     make_title: function
-    ##     map: function
-    ##     map_df: function
-    ##     n.breaks.cache: NULL
-    ##     na.translate: TRUE
-    ##     na.value: NA
-    ##     name: waiver
-    ##     palette: function
-    ##     palette.cache: NULL
-    ##     position: left
-    ##     range: <ggproto object: Class RangeDiscrete, Range, gg>
-    ##         range: NULL
-    ##         reset: function
-    ##         train: function
-    ##         super:  <ggproto object: Class RangeDiscrete, Range, gg>
-    ##     rescale: function
-    ##     reset: function
-    ##     scale_name: viridis_d
-    ##     train: function
-    ##     train_df: function
-    ##     transform: function
-    ##     transform_df: function
-    ##     super:  <ggproto object: Class ScaleDiscrete, Scale, gg>
-
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
 color scale `viridis`
 
 ## Themes
@@ -221,3 +164,90 @@ waikiki %>%
 ```
 
 <img src="viz_part2_files/figure-gfm/unnamed-chunk-8-1.png" width="90%" />
+
+## `patchwork`
+
+``` r
+gg_tmax_tmin <-  
+  weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  theme(legend.position = "none")
+
+gg_prcp_dens <-
+  weather_df %>% 
+  filter(prcp > 0) %>% 
+  ggplot(aes(x = prcp, fill = name)) +
+  geom_density(alpha = .3) +
+  theme(legend.position = "none")
+
+gg_tmax_date <- 
+  weather_df %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_point() +
+  geom_smooth() +
+  theme(legend.position = "bottom")
+
+(gg_tmax_tmin + gg_prcp_dens)
+```
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-9-1.png" width="90%" />
+
+## data manipulation
+
+quick example on factors
+
+``` r
+weather_df %>% 
+  mutate(
+    name = fct_reorder(name, tmax)
+  ) %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+```
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-10-1.png" width="90%" />
+
+What about tmax and tmin
+
+``` r
+weather_df %>% 
+  pivot_longer(
+    tmax:tmin,
+    names_to = "obs",
+    values_to = "temperature"
+  ) %>% 
+  ggplot(aes(x = temperature, fill = obs)) +
+  geom_density(alpha = .3) +
+  facet_grid(. ~ name)
+```
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-11-1.png" width="90%" />
+
+``` r
+pulse_df <-
+  haven::read_sas("data/public_pulse_data.sas7bdat") %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+    bdi_score_bl:bdi_score_12m,
+    names_to = "visit",
+    values_to = "bdi",
+    names_prefix = "bdi_score_"
+  ) %>% 
+  mutate(visit = recode(visit, "bl" = "00m"))
+
+pulse_df %>% 
+  ggplot(aes(x = visit, y = bdi)) +
+  geom_boxplot()
+```
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-12-1.png" width="90%" />
+
+``` r
+pulse_df %>% 
+  ggplot(aes(x = visit, y = bdi)) +
+  geom_point() +
+  geom_line(aes(group = id))
+```
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-12-2.png" width="90%" />
