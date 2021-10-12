@@ -92,8 +92,68 @@ weather_df %>%
   group_by(name) %>% 
   summarise(
     n_obs = n(),
-    mean_tmax = mean(tmax)
+    mean_tmax = mean(tmax, na.rm = TRUE)
   ) %>% 
   knitr::kable(digits = 2)
+```
+
+
+## grouped `mutate`
+
+```{r}
+weather_df %>% 
+  mutate(
+    mean_tmax = mean(tmax, na.rm = TRUE)
+  )
+
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    centered_tmax = tmax - mean_tmax
+  ) %>% 
+  ggplot(aes(x = date, y = centered_tmax, color = name)) +
+  geom_point()
+```
+
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    tmax_rank = min_rank(desc(tmax))
+  ) %>% 
+  filter(tmax_rank < 2)
+```
+
+Lagged variables(find data one or n rows lagged)
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    lagged_tmax = lag(tmax, n = 1),
+    tmax_diff = tmax - lagged_tmax
+  ) %>% 
+  summarise(diff_sd = sd(tmax_diff, na.rm = TRUE))
+```
+
+
+
+## Limitations
+
+What if my "summary" is linear model ...
+
+you cannot do `lm` in `summarise`
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  summarise(cor_tmin_tmax = cor(tmin, tmax, use = "complete"))
+
+weather_df %>% 
+  filter(name == "CentralPark_NY") %>% 
+  lm(tmax ~ tmin, data = .)
+
 ```
 
