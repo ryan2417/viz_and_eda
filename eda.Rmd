@@ -13,8 +13,6 @@ knitr::opts_chunk$set(
   fig.height = 6,
   out.width = "90%"
 )
-
-
 ```
 
 
@@ -37,5 +35,65 @@ weather_df =
   select(name, id, everything())
 ```
 
+## group_by()
 
+```{r}
+weather_df %>% 
+  group_by(name)
+
+```
+
+## count some things
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  summarise(n_obs = n())
+
+weather_df %>% 
+  count(name)
+
+
+```
+
+It's nice that summarise produces a data frame
+
+table() doesn't, that is bad.
+
+## two-by-two table
+
+```{r}
+weather_df %>% 
+  janitor::tabyl(month, name)
+```
+
+## More general summaries
+
+Let's count take means, look at SDs ...
+
+```{r}
+weather_df %>% 
+  group_by(name, month) %>% 
+  summarise(
+    n_obs = n(),
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    median_tmax = median(tmax, na.rm = TRUE),
+    sd_tmax = sd(tmax, na.rm = TRUE)
+  ) %>% 
+  ggplot(aes(x = month, y = mean_tmax, color = name)) +
+  geom_point() +
+  geom_line()
+```
+
+Formatting table outputs
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  summarise(
+    n_obs = n(),
+    mean_tmax = mean(tmax)
+  ) %>% 
+  knitr::kable(digits = 2)
+```
 
